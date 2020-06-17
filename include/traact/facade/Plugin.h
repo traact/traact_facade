@@ -37,11 +37,13 @@
 #include <traact/pattern/Pattern.h>
 #include <traact/buffer/GenericFactoryObject.h>
 #include <traact/component/Component.h>
+#include <rttr/registration>
+#include <rttr/type>
 
-#include <traact/traact_export.h>
+#include <traact/traact_facade_export.h>
 
 namespace traact::facade {
-class TRAACT_EXPORT Plugin {
+class TRAACT_FACADE_EXPORT Plugin : public std::enable_shared_from_this<Plugin> {
  public:
   typedef typename std::shared_ptr<Plugin> Ptr;
   Plugin() = default;;
@@ -69,6 +71,14 @@ class TRAACT_EXPORT Plugin {
                                                          const std::string &new_component_name) {
     return nullptr;
   }
+
+  template <typename Derived>
+  std::shared_ptr<Derived> shared_from_base()
+  {
+	  return std::static_pointer_cast<Derived>(shared_from_this());
+  }
+  /* Enable RTTR Type Introspection */
+  RTTR_ENABLE()
 };
 
 }

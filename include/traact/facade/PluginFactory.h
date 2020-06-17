@@ -40,11 +40,11 @@
 #include <traact/buffer/GenericFactoryObject.h>
 #include <traact/buffer/GenericComponentBuffer.h>
 #include <traact/facade/Plugin.h>
-#include <traact/traact_export.h>
+#include <traact/traact_facade_export.h>
 
 namespace traact::facade {
 
-class TRAACT_EXPORT PluginFactory {
+class TRAACT_FACADE_EXPORT PluginFactory {
  public:
   typedef typename buffer::GenericFactoryObject::Ptr FactoryObjectPtr;
   typedef typename component::Component::Ptr ComponentPtr;
@@ -52,6 +52,9 @@ class TRAACT_EXPORT PluginFactory {
 
   bool addLibrary(const std::string &filename);
   bool removeLibrary(const std::string &filename);
+
+  PluginFactory() = default;
+  ~PluginFactory() = default;
 
   std::vector<std::string> getDatatypeNames();
   std::vector<std::string> getPatternNames();

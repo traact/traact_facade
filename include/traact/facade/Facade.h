@@ -37,10 +37,10 @@
 #include <traact/dataflow/Network.h>
 #include <traact/component/ComponentGraph.h>
 
-#include <traact/traact_export.h>
+#include <traact/traact_facade_export.h>
 #include <traact/component/facade/ApplicationAsyncSource.h>
 namespace traact::facade {
-class TRAACT_EXPORT Facade {
+class TRAACT_FACADE_EXPORT Facade {
  public:
 
 

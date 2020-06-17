@@ -108,7 +108,7 @@ bool traact::facade::PluginFactory::Plugin::init() {
 
     if (!library_.load()) {
       auto error_string = library_.get_error_string();
-      spdlog::error("error loading plugin {0}", std::string(error_string.begin(), error_string.end()));
+      spdlog::error("error loading plugin: {0}", std::string(error_string.begin(), error_string.end()));
     }
   }
 
@@ -117,7 +117,7 @@ bool traact::facade::PluginFactory::Plugin::init() {
     if (!t.is_class() || t.is_wrapper())
       continue;
 
-    spdlog::info("loading plugin {0}", std::string(t.get_name().begin(), t.get_name().end()));
+    spdlog::info("loading plugin: {0}", std::string(t.get_name().begin(), t.get_name().end()));
 
     constructor ctor = t.get_constructor();
     if (!ctor.is_valid()) {
@@ -125,19 +125,27 @@ bool traact::facade::PluginFactory::Plugin::init() {
                     std::string(t.get_name().begin(), t.get_name().end()));
       return false;
     }
-
+	
     variant var = ctor.invoke();
     if (!var.is_valid()) {
       spdlog::error("invoking constructor() failed for {0}", std::string(t.get_name().begin(), t.get_name().end()));
       return false;
     }
 
-    traact::facade::Plugin::Ptr traact_plugin = var.get_value<traact::facade::Plugin::Ptr>();
+	auto shared_from_base_method = t.get_method("shared_from_base");
+	if (!shared_from_base_method.is_valid()) {
+		spdlog::error("shared_from_base method not available for: {0}", std::string(t.get_name().begin(), t.get_name().end()));
+		return false;
+	}
+
+	
+    //traact::facade::Plugin::Ptr traact_plugin = var.get_value<traact::facade::Plugin::Ptr>();
+	traact::facade::Plugin::Ptr traact_plugin = shared_from_base_method.invoke(var).get_value<traact::facade::Plugin::Ptr>();
 
     std::vector<std::string> tmp;
     traact_plugin->fillDatatypeNames(tmp);
     for (const auto &datatype_name : tmp) {
-      spdlog::info("register datatype {0}", datatype_name);
+      spdlog::info("register datatype: {0}", datatype_name);
       datatype_to_traact_plugin.emplace(std::make_pair(datatype_name, traact_plugin));
     }
     datatype_names.insert(datatype_names.end(), tmp.begin(), tmp.end());
@@ -145,7 +153,7 @@ bool traact::facade::PluginFactory::Plugin::init() {
     tmp.clear();
     traact_plugin->fillPatternNames(tmp);
     for (const auto &pattern_name : tmp) {
-      spdlog::info("register pattern {0}", pattern_name);
+      spdlog::info("register pattern: {0}", pattern_name);
       pattern_to_traact_plugin.emplace(std::make_pair(pattern_name, traact_plugin));
     }
     pattern_names.insert(pattern_names.end(), tmp.begin(), tmp.end());
@@ -162,15 +170,43 @@ bool traact::facade::PluginFactory::Plugin::teardown() {
   for (auto &item : datatype_to_traact_plugin) {
     item.second.reset();
   }
-  library_.unload();
+  return library_.unload();
 }
-traact::facade::PluginFactory::FactoryObjectPtr traact::facade::PluginFactory::Plugin::instantiateDataType(const std::string &datatype_name) {
-  return datatype_to_traact_plugin[datatype_name]->instantiateDataType(datatype_name);
+traact::facade::PluginFactory::FactoryObjectPtr traact::facade::PluginFactory::Plugin::instantiateDataType(const std::string &datatype_name) {	
+	auto find_result = datatype_to_traact_plugin.find(datatype_name);
+	if (find_result == datatype_to_traact_plugin.end()) {		
+		throw std::runtime_error(std::string("Trying to instantiate unkown datatype: ") + datatype_name);
+	}
+	return find_result->second->instantiateDataType(datatype_name);
+  
 }
 traact::facade::PluginFactory::PatternPtr traact::facade::PluginFactory::Plugin::instantiatePattern(const std::string &patternName) {
-  return pattern_to_traact_plugin[patternName]->instantiatePattern(patternName);
+	auto find_result = pattern_to_traact_plugin.find(patternName);
+	if (find_result == pattern_to_traact_plugin.end()) {
+		throw std::runtime_error(std::string("Trying to instantiate unkown pattern: ") + patternName);
+	}
+	return find_result->second->instantiatePattern(patternName);  
 }
 traact::facade::PluginFactory::ComponentPtr traact::facade::PluginFactory::Plugin::instantiateComponent(const std::string &patternName,
                                                                                                         const std::string &new_component_name) {
-  return pattern_to_traact_plugin[patternName]->instantiateComponent(patternName, new_component_name);
+
+	auto find_result = pattern_to_traact_plugin.find(patternName);
+	if (find_result == pattern_to_traact_plugin.end()) {
+		throw std::runtime_error(std::string("Trying to instantiate unkown component: ") + patternName);
+	}
+	return find_result->second->instantiateComponent(patternName, new_component_name);
+  
+}
+
+// It is not possible to place the macro multiple times in one cpp file. When you compile your plugin with the gcc toolchain,
+// make sure you use the compiler option: -fno-gnu-unique. otherwise the unregistration will not work properly.
+RTTR_PLUGIN_REGISTRATION // remark the different registration macro!
+{
+
+  using namespace rttr;
+registration::class_<traact::facade::Plugin>("Plugin").constructor<>()
+	//(
+	//policy::ctor::as_std_shared_ptr
+	//)
+	.method("shared_from_base", &traact::facade::Plugin::shared_from_base<traact::facade::Plugin>);
 }

@@ -67,14 +67,17 @@ class ApplicationAsyncSource : public Component {
     //spdlog::info("commit data");
     commit_callback_(ts);
 
+	return true;
+
   }
 
   bool start() override {
     spdlog::info("ApplicationAsyncSource got start signal");
-
+	return true;
   }
   bool stop() override {
     spdlog::info("ApplicationAsyncSource got stop signal");
+	return true;
   }
 
 };

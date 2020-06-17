@@ -124,14 +124,20 @@ traact::pattern::Pattern::Ptr traact::facade::Facade::instantiatePattern(const s
 
 }
 void traact::facade::Facade::init() {
-  auto const re = std::regex{R"(:+)"};
+#ifdef TRAACT_TARGET_WINDOWS
+	auto const re = std::regex{R"(;+)"};
+	const std::string file_ending = ".dll";
+#else
+	auto const re = std::regex{ R"(:+)" };
+	const std::string file_ending = ".so";
+#endif
   auto const plugin_dirs = std::vector<std::string>(
       std::sregex_token_iterator{begin(plugin_directories_), end(plugin_directories_), re, -1},
       std::sregex_token_iterator{}
   );
   for (const auto &plugin_dir : plugin_dirs) {
     spdlog::info("attempting to load plugin directory: {0}", plugin_dir);
-    std::vector<std::string> files = util::glob_files(plugin_dir);
+    std::vector<std::string> files = util::glob_files(plugin_dir, file_ending);
     for (const auto &file : files) {
       factory_.addLibrary(file);
     }

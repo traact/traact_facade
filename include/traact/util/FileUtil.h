@@ -37,6 +37,16 @@
 #include <vector>
 
 namespace traact::util {
+
+bool hasEnding(std::string const &fullString, std::string const &ending) {
+	if (fullString.length() >= ending.length()) {
+		return (0 == fullString.compare(fullString.length() - ending.length(), ending.length(), ending));
+	}
+	else {
+		return false;
+	}
+}
+
 std::vector<std::string> glob_files(const std::string &path) {
   std::vector<std::string> result;
   if (!path.empty()) {
@@ -52,6 +62,20 @@ std::vector<std::string> glob_files(const std::string &path) {
   }
   return std::move(result);
 }
+
+std::vector<std::string> glob_files(const std::string &path, const std::string &file_ending) {
+	std::vector<std::string> result;
+
+	for (std::string path : glob_files(path)) {
+		if (hasEnding(path, file_ending))
+			result.emplace_back(path);
+	}
+	
+
+
+	return std::move(result);
+}
+
 }
 
 #endif //TRAACTMULTI_TRAACT_FACADE_INCLUDE_TRAACT_UTIL_FILEUTIL_H_

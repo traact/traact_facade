@@ -9,6 +9,7 @@ set(CMAKE_CXX_STANDARD 17)
 set(LIB_HEADERS
         include/traact/facade/Facade.cpp
         include/traact/facade/Facade.h
+		include/traact/traact_facade_export.h
         include/traact/facade/PluginFactory.cpp
         include/traact/facade/PluginFactory.h
         include/traact/facade/Plugin.h
@@ -44,7 +45,30 @@ endif ()
 add_definitions(-DTBB_PREVIEW_FLOW_GRAPH_FEATURES=1)
 add_definitions(-DTBB_PREVIEW_FLOW_GRAPH_NODES=1)
 
+# conan workspace and cmake don't work that well together, did not manage to get the build dir into the includes: 
+# force generated file into source include dir 
+# only one export file could be generated
+# use files and defines instead
+#set(CMAKE_CXX_VISIBILITY_PRESET hidden)
+#set(CMAKE_VISIBILITY_INLINES_HIDDEN 1)
+#generate_export_header(${CONAN_PACKAGE_NAME} EXPORT_FILE_NAME "../../include/traact/${CONAN_PACKAGE_NAME}_export.h")
 
+if(UNIX)
+    if(APPLE)
+        MESSAGE(STATUS "Building for Macos.")
+        add_definitions(-DTRAACT_TARGET_APPLE=1)
+    endif()
+    MESSAGE(STATUS "Building for Unix.")
+    add_definitions(-DTRAACT_TARGET_UNIX=1)
+elseif(WIN32)
+    MESSAGE(STATUS "Building for Windows.")
+    add_definitions(-DTRAACT_TARGET_WINDOWS=1)
+endif()
+
+if (MSVC)
+    # per default disable extended aligned storage for now on msvc
+    add_definitions(-D_DISABLE_EXTENDED_ALIGNED_STORAGE -DHAVE_SNPRINTF)
+endif()
 
 add_library(${CONAN_PACKAGE_NAME} SHARED
         ${LIB_HEADERS}

@@ -60,14 +60,18 @@ class ApplicationSyncSink : public Component {
 
     if(callback_)
       callback_(data.getTimestamp(), input);
+
+	return true;
   }
 
   bool start() override {
     spdlog::info("ApplicationSyncSink got start signal");
+	return true;
 
   }
   bool stop() override {
     spdlog::info("ApplicationSyncSink got stop signal");
+	return true;
   }
 
   void SetCallback(const NewValueCallback &callback) {
