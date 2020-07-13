@@ -14,7 +14,7 @@ set(LIB_HEADERS
         include/traact/facade/PluginFactory.h
         include/traact/facade/Plugin.h
         include/traact/util/FileUtil.h
-        include/traact/component/facade/ApplicationAsyncSource.h include/traact/component/facade/ApplicationSyncSink.h)
+        include/traact/component/facade/ApplicationAsyncSource.h include/traact/component/facade/ApplicationSyncSink.h include/traact/component/PlayerBaseComponent.cpp include/traact/component/PlayerBaseComponent.h)
 
 # rest of source code
 #set(LIB_SOURCES )

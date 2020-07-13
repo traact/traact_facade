@@ -69,8 +69,8 @@ void traact::facade::Facade::loadDataflow(traact::pattern::instance::GraphInstan
       auto newComponent =
           factory_.instantiateComponent(dataflow_component->getPatternName(), dataflow_component->instance_id);
       component_graph_->addPattern(dataflow_component->instance_id, newComponent);
-      nlohmann::json foo_parameter;
-      newComponent->updateParameter(foo_parameter);
+
+      newComponent->updateParameter(dataflow_component->pattern_pointer.parameter);
 
 
 

@@ -36,7 +36,7 @@ class Traact(ConanFile):
         self.requires("traact_run_env/%s@camposs/stable" % self.version)
         self.requires("traact_core/%s@camposs/stable" % self.version)
         self.requires("rttr/0.9.7-dev@camposs/stable")
-        self.requires("Boost/1.70.0@camposs/stable")
+        self.requires("Boost/1.72.0@camposs/stable")
 
     def _configure_cmake(self):
         cmake = CMake(self)

@@ -132,6 +132,7 @@ bool traact::facade::PluginFactory::Plugin::init() {
       return false;
     }
 
+
 	auto shared_from_base_method = t.get_method("shared_from_base");
 	if (!shared_from_base_method.is_valid()) {
 		spdlog::error("shared_from_base method not available for: {0}", std::string(t.get_name().begin(), t.get_name().end()));
@@ -140,7 +141,9 @@ bool traact::facade::PluginFactory::Plugin::init() {
 
 	
     //traact::facade::Plugin::Ptr traact_plugin = var.get_value<traact::facade::Plugin::Ptr>();
-	traact::facade::Plugin::Ptr traact_plugin = shared_from_base_method.invoke(var).get_value<traact::facade::Plugin::Ptr>();
+	//traact::facade::Plugin::Ptr traact_plugin = shared_from_base_method.invoke(var).get_value<traact::facade::Plugin::Ptr>();
+    traact::facade::Plugin::Ptr traact_plugin = var.get_value<traact::facade::Plugin::Ptr>();
+
 
     std::vector<std::string> tmp;
     traact_plugin->fillDatatypeNames(tmp);
